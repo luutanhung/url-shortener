@@ -12,11 +12,15 @@ certifi==2025.8.3
     #   httpcore
     #   httpx
     #   sentry-sdk
+cfgv==3.4.0
+    # via pre-commit
 click==8.2.1
     # via
     #   rich-toolkit
     #   typer
     #   uvicorn
+distlib==0.4.0
+    # via virtualenv
 dnspython==2.7.0
     # via
     #   email-validator
@@ -33,6 +37,8 @@ fastapi-cli==0.0.8
     # via fastapi
 fastapi-cloud-cli==0.1.5
     # via fastapi-cli
+filelock==3.19.1
+    # via virtualenv
 h11==0.16.0
     # via
     #   httpcore
@@ -45,6 +51,8 @@ httpx==0.28.1
     # via
     #   fastapi
     #   fastapi-cloud-cli
+identify==2.6.13
+    # via pre-commit
 idna==3.10
     # via
     #   anyio
@@ -58,6 +66,12 @@ markupsafe==3.0.2
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+nodeenv==1.9.1
+    # via pre-commit
+platformdirs==4.3.8
+    # via virtualenv
+pre-commit==4.3.0
+    # via url-shortener (pyproject.toml)
 pydantic==2.11.7
     # via
     #   url-shortener (pyproject.toml)
@@ -76,7 +90,9 @@ python-dotenv==1.1.1
 python-multipart==0.0.20
     # via fastapi
 pyyaml==6.0.2
-    # via uvicorn
+    # via
+    #   pre-commit
+    #   uvicorn
 rich==14.1.0
     # via
     #   rich-toolkit
@@ -122,6 +138,8 @@ uvicorn==0.35.0
     #   fastapi-cloud-cli
 uvloop==0.21.0
     # via uvicorn
+virtualenv==20.34.0
+    # via pre-commit
 watchfiles==1.1.0
     # via uvicorn
 websockets==15.0.1

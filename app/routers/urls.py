@@ -17,7 +17,7 @@ router = APIRouter()
     response_model=URLModel,
     status_code=status.HTTP_201_CREATED,
 )
-async def shorten_url(data: CreateURLModel):
+async def shorten(data: CreateURLModel):
     seq_id: int = get_next_id()
     print(seq_id)
     short_code: str = base62encode(seq_id)
@@ -28,6 +28,8 @@ async def shorten_url(data: CreateURLModel):
     }
 
     result = await db.urls.insert_one(url_doc)
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to insert URL")
     url_doc["id"] = str(result.inserted_id)
     return URLModel(**url_doc)
 

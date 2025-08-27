@@ -1,22 +1,34 @@
-from kazoo.client import KazooClient
-from kazoo.handlers.threading import KazooTimeoutError
+import os
 
-ZK_HOSTS = "127.0.0.1:2181"
+from dotenv import load_dotenv
+from kazoo.client import KazooClient
+
+load_dotenv()
+
+ZK_HOSTS = (
+    os.getenv("ZOOKEEPER_HOST", "zookeeper") + ":" + os.getenv("ZOOKEEPER_PORT", "2181")
+)
 zk = None
 BASE_PATH = "/url_shortener"
 
 
-def init_zookeeper():
+def init_zookeeper(retries: int = 10, delay: int = 3):
     global zk
     zk = KazooClient(hosts=ZK_HOSTS)
 
-    try:
-        zk.start(timeout=5)
-        zk.ensure_path("/url_shortener")
-        print("Zookeeper connected and path ensured")
-    except KazooTimeoutError:
-        print("Failed to connect to Zookeeper within timeout")
-        raise
+    for i in range(retries):
+        try:
+            zk.start(timeout=5)
+            print("Connected to Zookeeper at:", ZK_HOSTS)
+            zk.ensure_path("/url_shortener")
+            print("Zookeeper connected and path ensured")
+            return zk
+        except Exception as e:
+            print(f"Zookeeper connection failed ({i + 1}/{retries}): {e}")
+            import time
+
+            time.sleep(delay)
+    raise RuntimeError("Failed to connect to Zookeeper after retries")
 
 
 def close_zookeeper():

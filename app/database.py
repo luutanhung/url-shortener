@@ -5,5 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = AsyncMongoClient(os.getenv("MONGO_URL"))
-db = client[os.getenv("DATABASE_NAME")]
+print("MONGO_URI", os.getenv("MONGO_URI"))
+
+client = AsyncMongoClient(os.getenv("MONGO_URI", "mongodb://mongodb:27017"))
+db = client[os.getenv("DATABASE_NAME", "url_shortener")]

@@ -1,33 +1,30 @@
-import string
-import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import RedirectResponse
 
+from app.zookeeper import get_next_id
+from app.utils import base62encode
 from app.models import URLModel, CreateURLModel
 from app.database import db
 
 router = APIRouter()
 
 
-def generate_short_code(length: int = 6) -> str:
-    chars = string.ascii_letters + string.digits
-    return "".join(random.choice(chars) for _ in range(length))
-
-
 @router.post(
-    "/shorten",
+    "/api/shorten",
     response_description="Shorten a URL",
     response_model=URLModel,
     status_code=status.HTTP_201_CREATED,
 )
 async def shorten_url(data: CreateURLModel):
-    short_code: str = generate_short_code()
+    seq_id: int = get_next_id()
+    print(seq_id)
+    short_code: str = base62encode(seq_id)
     url_doc = {
         "short_code": short_code,
         "original_url": str(data.url),
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
     }
 
     result = await db.urls.insert_one(url_doc)

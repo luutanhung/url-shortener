@@ -5,13 +5,64 @@
 URL Shortener takes a long, messy link and transforms it to a concise, elegant, and easy-to-share version.
 
 ## Table of Contents
-- [Usage](#usage)
+- [Getting Started](#getting-started)
 - [Requirements](#requirements)
 - [Security Reports](#security-reports)
 - [License](#license)
+- [Authors](#authors)
 
-## Usage
-Provide examples and screenshots or GIFs to demonstrate how to use your project.
+## Getting Started
+
+This project provides a simple URL Shortener. Below are the main API endpoints:
+
+### Shorten URL [POST /api/shorten]
+Creates a shortened version of the provided URL.
+
++ Request (application/json)
+
+        {
+            "url": "https://example.com"
+        }
+
++ Response 201 (application/json)
+
+        {
+            "id": "1",
+            "short_code": "abc123",
+            "original_url": "https://example.com",
+            "created_at": "2025-08-28T07:53:04Z"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "detail": "Invalid URL format"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "detail": "Failed to insert URL"
+        }
+
+### Redirect to Original URL [GET /{short_code}]
+
+Redirects to the original URL based on the provided short code.
+
++ Parameters
+    + short_code (string) - The shortened URL code
+
++ Response 302 (application/json)
+
+        {
+            "original_url": "https://example.com"
+        }
+
++ Response 404 (application/json)
+
+        {
+            "detail": "Short URL not found"
+        }
 
 ## Requirements
 - **[Docker](https://www.docker.com/)** >= 24.0

@@ -1,12 +1,15 @@
-# 🚀 URL Shortener
-
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+<div align="center">
+    <h3>🚀 URL Shortener</h3>
+    <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
+</div>
 
 URL Shortener takes a long, messy link and transforms it to a concise, elegant, and easy-to-share version.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Requirements](#requirements)
+- [Installation](#installation)
+- [Learning FastAPI](#learning-fastapi)
 - [Security Reports](#security-reports)
 - [License](#license)
 - [Authors](#authors)
@@ -75,7 +78,6 @@ For detailed instructions on installing Docker and Docker Compose, you can visit
 - Docker Compose: [Overview of installing Docker Compose
 ](https://docs.docker.com/compose/install/)
 
-
 ## Installation
 This project uses **Docker Compose** to simplify setup, so you don't need to install dependencies manually. The provided `docker-compose.yml` will:
 1. Pull necessary Docker images.
@@ -86,6 +88,11 @@ After cloning the repository, simply run:
 docker compose up -d
 ```
 
+## Learning FastAPI
+
+If you are new to FastAPI, here are some resources to help you get started:
+- [Official FastAPI Documentation](https://fastapi.tiangolo.com) has comprehensive guide, tutorials, and examples.
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/fastapi) and the FastAPI GitHub discussions for real-world questions and answers.
 
 ## Security Reports
 Please send any security-related issues to <luutanhung.dev@gmail.com>. Thanks a lot.

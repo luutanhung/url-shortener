@@ -1,8 +1,15 @@
+<p align="center">
+    <a href="https://github.com/luutanhung/url-shortener">
+        <img src="assets/url-shortener-logo.png" alt="URL Shortener Logo" width="200" height="165">
+    </a>
+</p>
+
 <div align="center">
     <h3>🚀 URL Shortener</h3>
     <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
 </div>
 
+## URL Shortener
 URL Shortener takes a long, messy link and transforms it to a concise, elegant, and easy-to-share version.
 
 ## Table of Contents

@@ -13,7 +13,10 @@ class URLModel(BaseModel):
     short_code: str
     original_url: HttpUrl
     created_at: datetime
+    clicks: int
+    last_accessed: datetime | None
+    salt: int
 
 
-class CreateURLModel(BaseModel):
-    url: HttpUrl
+class CreateURL(BaseModel):
+    original_url: HttpUrl

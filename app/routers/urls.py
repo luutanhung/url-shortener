@@ -1,11 +1,10 @@
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 
 from app.database import get_db
-from app.models import URLModel, CreateURLModel
+from app.services.hash_shortener import HashURLShortener
+from app.models import CreateURL, URLModel
 
 router = APIRouter()
 
@@ -16,26 +15,28 @@ router = APIRouter()
     response_model=URLModel,
     status_code=status.HTTP_201_CREATED,
 )
-async def shorten(data: CreateURLModel, db: Database = Depends(get_db)):
-    short_code: str = "something"
-    url_doc = {
-        "short_code": short_code,
-        "original_url": str(data.url),
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    result = await db.urls.insert_one(url_doc)
-    if not result:
-        raise HTTPException(status_code=500, detail="Failed to insert URL")
-    url_doc["id"] = str(result.inserted_id)
-    return URLModel(**url_doc)
+async def shorten(url_data: CreateURL, db: Database = Depends(get_db)):
+    try:
+        shortener = HashURLShortener(db)
+        result = await shortener.shorten(str(url_data.original_url))
+        return URLModel(**result)
+    except ValueError as e:
+        print("Validation error in URL shortening", str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print("Unexpected error shortening URL", str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{short_code}", response_description="Redirect to original URL")
-async def redirect_to_url(short_code: str, db: Database = Depends(get_db)):
-    url_doc = await db.urls.find_one({"short_code": short_code})
-
-    if not url_doc:
-        raise HTTPException(status_code=404, detail="Short URL not found")
-
-    return RedirectResponse(url=url_doc["original_url"])
+async def redirect(short_code: str, db: Database = Depends(get_db)):
+    try:
+        shortener = HashURLShortener(db)
+        original_url: str = await shortener.get_original_url(short_code)
+        if not original_url:
+            raise HTTPException(status_code=404, detail="URL not found")
+        return RedirectResponse(url=original_url)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")

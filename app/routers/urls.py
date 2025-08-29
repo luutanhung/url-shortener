@@ -4,7 +4,7 @@ from pymongo.database import Database
 
 from app.database import get_db
 from app.services.hash_shortener import HashURLShortener
-from app.models import CreateURL, URLModel
+from app.models.urls import CreateURL, URLModel
 
 router = APIRouter()
 

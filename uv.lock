@@ -806,6 +806,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "dotenv" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "jinja2" },
     { name = "kazoo" },
     { name = "pre-commit" },
     { name = "pydantic" },
@@ -819,6 +820,7 @@ dependencies = [
 requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
+    { name = "jinja2", specifier = ">=3.1.6" },
     { name = "kazoo", specifier = ">=2.10.0" },
     { name = "pre-commit", specifier = ">=4.3.0" },
     { name = "pydantic", specifier = ">=2.11.7" },

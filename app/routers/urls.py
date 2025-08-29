@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import RedirectResponse
+from pymongo.database import Database
 
+from app.database import get_db
 from app.models import URLModel, CreateURLModel
-from app.database import db
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ router = APIRouter()
     response_model=URLModel,
     status_code=status.HTTP_201_CREATED,
 )
-async def shorten(data: CreateURLModel):
+async def shorten(data: CreateURLModel, db: Database = Depends(get_db)):
     short_code: str = "something"
     url_doc = {
         "short_code": short_code,
@@ -31,7 +32,7 @@ async def shorten(data: CreateURLModel):
 
 
 @router.get("/{short_code}", response_description="Redirect to original URL")
-async def redirect_to_url(short_code: str):
+async def redirect_to_url(short_code: str, db: Database = Depends(get_db)):
     url_doc = await db.urls.find_one({"short_code": short_code})
 
     if not url_doc:

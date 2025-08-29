@@ -3,8 +3,6 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import RedirectResponse
 
-from app.zookeeper import get_next_id
-from app.utils import base62encode
 from app.models import URLModel, CreateURLModel
 from app.database import db
 
@@ -18,9 +16,7 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def shorten(data: CreateURLModel):
-    seq_id: int = get_next_id()
-    print(seq_id)
-    short_code: str = base62encode(seq_id)
+    short_code: str = "something"
     url_doc = {
         "short_code": short_code,
         "original_url": str(data.url),

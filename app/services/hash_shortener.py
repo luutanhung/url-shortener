@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pymongo.database import Database
 from pymongo import ReturnDocument
 
+from app.models import URL
+
 
 class HashURLShortener:
     def __init__(self, db: Database):
@@ -52,18 +54,17 @@ class HashURLShortener:
                 f"{original_url}{datetime.now().timestamp()}"
             )
 
-        url_doc = {
-            "original_url": original_url,
-            "short_code": short_code,
-            "created_at": datetime.now(timezone.utc),
-            "clicks": 0,
-            "last_accessed": None,
-            "salt": salt,
-        }
+        url_doc = URL(
+            original_url=original_url,
+            short_code=short_code,
+            created_at=datetime.now(timezone.utc),
+            clicks=0,
+            last_accessed=None,
+            salt=salt,
+        )
 
-        result = await self.urls.insert_one(url_doc)
-        url_doc["_id"] = str(result.inserted_id)
-        return url_doc
+        await url_doc.insert()
+        return url_doc.model_dump()
 
     async def get_original_url(self, short_code: str) -> str | None:
         result = await self.urls.find_one_and_update(

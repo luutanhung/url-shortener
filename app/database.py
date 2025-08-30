@@ -33,12 +33,12 @@ class MongoDBConnection:
             print(f"Unexpected error connection to MongoDB: {e}")
             raise
 
-    def close(self) -> None:
+    async def close(self) -> None:
         if self.client:
-            self.client.close()
+            await self.client.close()
             print("MongoDB connection closed")
 
-    def get_database(self) -> Database:
+    def get_db(self) -> Database:
         if not self.client:
             raise RuntimeError("Database not connected. Call connect() first.")
         return self.db
@@ -49,7 +49,7 @@ mongodb = MongoDBConnection()
 
 def get_db() -> Database:
     try:
-        return mongodb.get_database()
+        return mongodb.get_db()
     except Exception as e:
         print(f"Database session error: {e}")
         raise

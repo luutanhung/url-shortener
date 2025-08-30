@@ -4,7 +4,7 @@ from pymongo.database import Database
 
 from app.database import get_db
 from app.services.hash_shortener import HashURLShortener
-from app.models.urls import CreateURL, URLModel
+from app.schemas import URLBase, URLCreate
 
 router = APIRouter()
 
@@ -12,14 +12,14 @@ router = APIRouter()
 @router.post(
     "/api/shorten",
     response_description="Shorten a URL",
-    response_model=URLModel,
+    response_model=URLBase,
     status_code=status.HTTP_201_CREATED,
 )
-async def shorten(url_data: CreateURL, db: Database = Depends(get_db)):
+async def shorten(url_data: URLCreate, db: Database = Depends(get_db)):
     try:
         shortener = HashURLShortener(db)
         result = await shortener.shorten(str(url_data.original_url))
-        return URLModel(**result)
+        return URLBase(**result)
     except ValueError as e:
         print("Validation error in URL shortening", str(e))
         raise HTTPException(status_code=400, detail=str(e))

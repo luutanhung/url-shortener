@@ -14,9 +14,18 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.10
+    rev: v0.12.11
     hooks:
     -   id: ruff
         args:
         - --fix
     -   id: ruff-format
+
+-   repo: local
+    hooks:
+      - id: eslint-frontend
+        name: ESLint (Next.js frontend)
+        entry: bash -c "cd frontend && npm run lint"
+        language: node
+        types_or: [javascript, jsx, ts, tsx]
+        pass_filenames: false

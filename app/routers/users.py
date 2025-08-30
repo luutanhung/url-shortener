@@ -1,5 +1,37 @@
-from fastapi import APIRouter, HTTPException
+from datetime import datetime, timedelta, timezone
+
+from jose import jwt
+from fastapi import APIRouter, HTTPException, Request, Depends
+from jose import JWTError
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.models.user import User, UserRead, UserCreate
+
+SECRET_KEY = "your-secret-key"
+ALGORITHM = "HS256"
+
+
+class JWTBearer(HTTPBearer):
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+        if not credentials:
+            raise HTTPException(status_code=403, detail="Invalid authorization code")
+        try:
+            payload = decode_access_token(credentials.credentials)
+            return payload
+        except JWTError:
+            raise HTTPException(status_code=403, detail="Invalid token")
+
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=1))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_access_token(token: str):
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
 
 router = APIRouter(prefix="/auth")
 
@@ -15,3 +47,19 @@ async def register(user: UserCreate):
     return UserRead(
         id=str(user_doc.id), email=user_doc.email, username=user_doc.username
     )
+
+
+@router.post("/jwt/login")
+async def login(email: str, pwd: str):
+    user = await User.find_one(User.email == email)
+    if not user or not user.verify_pwd(pwd):
+        raise HTTPException(status_code=404, detail="Invalid credentials")
+    token = create_access_token({"sub": str(user.id)})
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/me", dependencies=[Depends(JWTBearer())], response_model=UserRead)
+async def get_me(user_data=Depends(JWTBearer())):
+    user_id = user_data["sub"]
+    user = await User.get(user_id)
+    return UserRead(id=str(user.id), email=user.email, username=user.username)

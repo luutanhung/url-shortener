@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"cd .. && fastapi dev app/main.py\" \"next dev\"",
+    "backend": "cd .. && fastapi dev app/main.py",
+    "frontend": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

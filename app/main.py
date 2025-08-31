@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
 from beanie import init_beanie
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import mongodb
 from app.models import URL, User
@@ -27,6 +27,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="URL Shortener", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(urls.router, tags=["URLs"])
 app.include_router(users.router, tags=["Auth"])

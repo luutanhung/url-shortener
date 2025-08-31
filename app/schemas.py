@@ -1,9 +1,9 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
-from typing_extensions import Annotated
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.functional_validators import BeforeValidator
+from typing_extensions import Annotated
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
@@ -20,3 +20,8 @@ class URLBase(BaseModel):
 
 class URLCreate(BaseModel):
     original_url: HttpUrl
+
+
+class LoginRequest(BaseModel):
+    email: str
+    pwd: str

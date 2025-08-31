@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
-from jose import jwt
-from fastapi import APIRouter, HTTPException, Request, Depends
-from jose import JWTError
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.models.user import User, UserRead, UserCreate
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+
+from app.models.user import User, UserCreate, UserRead
+from app.schemas import LoginRequest
 
 SECRET_KEY = "your-secret-key"
 ALGORITHM = "HS256"
@@ -50,7 +51,9 @@ async def register(user: UserCreate):
 
 
 @router.post("/jwt/login")
-async def login(email: str, pwd: str):
+async def login(data: LoginRequest):
+    email: str = data.email
+    pwd: str = data.pwd
     user = await User.find_one(User.email == email)
     if not user or not user.verify_pwd(pwd):
         raise HTTPException(status_code=404, detail="Invalid credentials")

@@ -1,7 +1,7 @@
 from beanie import Document
-from pydantic import BaseModel, EmailStr
-from passlib.hash import bcrypt
 from bson.objectid import ObjectId
+from passlib.hash import bcrypt
+from pydantic import BaseModel, EmailStr, model_validator
 
 
 class User(Document):
@@ -25,8 +25,14 @@ class User(Document):
 
 class UserCreate(BaseModel):
     email: EmailStr
-    username: str
+    username: str | None = None
     pwd: str
+
+    @model_validator(mode="before")
+    def set_username_if_missing(cls, values):
+        if not values.get("username") and "email" in values:
+            values["username"] = values["email"].split("@")[0]
+        return values
 
 
 class UserRead(BaseModel):

@@ -20,6 +20,7 @@ export default function LoginPage() {
       const res = await api.post("/auth/jwt/login", values);
       const token = res.data.access_token;
       localStorage.setItem("token", token);
+      router.push("/dashboard");
     } catch (error) {
       console.err(response?.data?.message || "Login failed!");
     } finally {

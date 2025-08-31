@@ -54,3 +54,6 @@ wheels/
 # typescript
 **/*.tsbuildinfo
 **/next-env.d.ts
+
+# VSCode
+.vscode

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import mongodb
 from app.models import URL, User
-from app.routers import urls, users
+from app.routers import auth, urls, users
 
 
 @asynccontextmanager
@@ -36,8 +36,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, tags=["Auth"])
 app.include_router(urls.router, tags=["URLs"])
-app.include_router(users.router, tags=["Auth"])
+app.include_router(users.router, tags=["Users"])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

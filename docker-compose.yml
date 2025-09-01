@@ -1,23 +1,4 @@
 services:
-  url-shortener:
-    build:
-      context: .
-    container_name: url-shortener
-    restart: always
-    depends_on:
-      - mongodb
-      - zookeeper
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    command:  >
-      sh -c "
-        ./wait-for-it.sh mongodb:27017 -t 60 -- echo 'MongoDB is up' &&
-        ./wait-for-it.sh zookeeper:2181 -t 60 -- echo 'Zookeeper is up' &&
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      "
-
   mongodb:
     image: mongo:6.0
     container_name: mongodb
@@ -29,13 +10,35 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  zookeeper:
-    image: zookeeper:3.9
-    container_name: zookeeper
+  backend:
+    build:
+      context: .
+    container_name: backend
     restart: always
+    depends_on:
+      - mongodb
     ports:
-      - "2181:2181"
-      - "8080:8080"
+      - "8000:8000"
+    env_file:
+      - .env
+    command:  >
+      sh -c "
+        ./wait-for-it.sh mongodb:27017 -t 60 -- echo 'MongoDB is up' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    depends_on:
+     - backend
+    ports:
+      - "3000:3000"
+    environment:
+      API_URL: "http://backend:8000"
 
 volumes:
   mongo_data:

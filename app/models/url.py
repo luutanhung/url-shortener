@@ -1,9 +1,9 @@
-from typing import Optional
 from datetime import datetime, timezone
-from bson.objectid import ObjectId
+from typing import Optional
 
-from pydantic import HttpUrl, Field
-from beanie import Document
+from beanie import Document, PydanticObjectId
+from bson.objectid import ObjectId
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class URL(Document):
@@ -13,8 +13,36 @@ class URL(Document):
     clicks: int = 0
     last_accessed: Optional[datetime] = None
     salt: int
+    created_by: Optional[str] = None
+    expires_at: datetime | None = None
 
     class Settings:
         name = "urls"
 
     model_config = {"json_encoders": {ObjectId: str}}
+
+
+class URLRead(BaseModel):
+    id: PydanticObjectId = Field(alias="_id")
+    short_code: str
+    original_url: HttpUrl
+    created_at: datetime
+    clicks: int
+    last_accessed: datetime | None
+    salt: int
+    created_by: Optional[str]
+    expires_at: Optional[datetime]
+
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+        "json_encoders": {
+            PydanticObjectId: str,
+        },
+    }
+
+
+class URLCreate(BaseModel):
+    original_url: HttpUrl
+    short_code: str | None = None
+    expires_at: datetime | None = None

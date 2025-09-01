@@ -1,10 +1,14 @@
-from fastapi import APIRouter, status, HTTPException, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 
 from app.database import get_db
+from app.models import URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
-from app.schemas import URLBase, URLCreate
+
+from .auth import get_current_user_optional
 
 router = APIRouter()
 
@@ -12,14 +16,24 @@ router = APIRouter()
 @router.post(
     "/api/shorten",
     response_description="Shorten a URL",
-    response_model=URLBase,
+    response_model=URLRead,
+    response_model_by_alias=False,
     status_code=status.HTTP_201_CREATED,
 )
-async def shorten(url_data: URLCreate, db: Database = Depends(get_db)):
+async def shorten(
+    url_data: URLCreate,
+    db: Database = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
     try:
         shortener = HashURLShortener(db)
-        result = await shortener.shorten(str(url_data.original_url))
-        return URLBase(**result)
+        result = await shortener.shorten(
+            str(url_data.original_url),
+            created_by=str(user.id) if user else None,
+            short_code=url_data.short_code,
+            expires_at=url_data.expires_at,
+        )
+        return URLRead(**result)
     except ValueError as e:
         print("Validation error in URL shortening", str(e))
         raise HTTPException(status_code=400, detail=str(e))

@@ -1,10 +1,11 @@
-import hashlib
 import base64
-from typing import Any
-from datetime import datetime, timezone
+import hashlib
+from datetime import datetime, timedelta, timezone
+from typing import Any, Optional
 
-from pymongo.database import Database
+from fastapi import HTTPException
 from pymongo import ReturnDocument
+from pymongo.database import Database
 
 from app.models import URL
 
@@ -33,10 +34,28 @@ class HashURLShortener:
     async def _check_collision(self, short_code: str) -> bool:
         return await self.urls.find_one({"short_code": short_code}) is not None
 
-    async def shorten(self, original_url: str) -> dict[str, Any]:
-        existing_url = await self.urls.find_one({"original_url": original_url})
-        if existing_url:
-            return existing_url
+    async def shorten(
+        self,
+        original_url: str,
+        created_by: Optional[str],
+        short_code: str = None,
+        expires_at: datetime = None,
+    ) -> dict[str, Any]:
+        if created_by:
+            if existing_url := await URL.find_one(
+                {"original_url": original_url, "created_by": created_by}
+            ):
+                return existing_url.model_dump()
+        else:
+            if existing_url := await URL.find_one(
+                {"original_url": original_url, "created_by": None}
+            ):
+                return existing_url.model_dump()
+
+        if short_code is not None:
+            existing_code = URL.find_one({"short_code": short_code})
+            if existing_code:
+                raise HTTPException(status_code=400, detail="Short code already exists")
 
         salt: int = 0
         max_attempts: int = 10
@@ -54,6 +73,8 @@ class HashURLShortener:
                 f"{original_url}{datetime.now().timestamp()}"
             )
 
+        expires_at = expires_at or (datetime.now(timezone.utc) + timedelta(days=1))
+
         url_doc = URL(
             original_url=original_url,
             short_code=short_code,
@@ -61,6 +82,8 @@ class HashURLShortener:
             clicks=0,
             last_accessed=None,
             salt=salt,
+            created_by=created_by,
+            expires_at=expires_at,
         )
 
         await url_doc.insert()

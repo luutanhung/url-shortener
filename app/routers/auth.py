@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +16,9 @@ from app.models import (
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/jwt/login")
+oauth2_schema_optional = OAuth2PasswordBearer(
+    tokenUrl="/api/auth/jwt/login", auto_error=False
+)
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -47,6 +51,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
     return user
+
+
+async def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_schema_optional),
+) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        return await get_current_user(token)
+    except Exception:
+        return None
 
 
 router = APIRouter(prefix="/api/auth")

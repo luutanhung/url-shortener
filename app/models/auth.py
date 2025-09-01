@@ -20,3 +20,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_pwd: str
+    new_pwd: str

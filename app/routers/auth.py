@@ -5,7 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.config import JWT_ALGORITHM, JWT_SECRET_KEY
-from app.models import RegisterRequest, Token, User, UserRead
+from app.models import (
+    ChangePasswordRequest,
+    RegisterRequest,
+    ResponseModel,
+    Token,
+    User,
+    UserRead,
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/jwt/login")
 
@@ -67,3 +74,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=404, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id)})
     return Token(access_token=token, token_type="bearer")
+
+
+@router.post("/change-password", response_model=ResponseModel)
+async def change_password(
+    data: ChangePasswordRequest, user: User = Depends(get_current_user)
+):
+    if not user.verify_pwd(data.old_pwd):
+        raise HTTPException(status_code=400, detail="Old password is incorrect")
+
+    user.pwd = User.hash_pwd(data.new_pwd)
+    await user.save()
+    return ResponseModel(success=True, message="Password changed successfully")

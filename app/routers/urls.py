@@ -2,9 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
-from pymongo.database import Database
 
-from app.database import get_db
 from app.models import URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
 
@@ -22,11 +20,10 @@ router = APIRouter()
 )
 async def shorten(
     url_data: URLCreate,
-    db: Database = Depends(get_db),
     user: Optional[User] = Depends(get_current_user_optional),
 ):
     try:
-        shortener = HashURLShortener(db)
+        shortener = HashURLShortener()
         result = await shortener.shorten(
             str(url_data.original_url),
             created_by=str(user.id) if user else None,
@@ -43,9 +40,9 @@ async def shorten(
 
 
 @router.get("/{short_code}", response_description="Redirect to original URL")
-async def redirect(short_code: str, db: Database = Depends(get_db)):
+async def redirect(short_code: str):
     try:
-        shortener = HashURLShortener(db)
+        shortener = HashURLShortener()
         original_url: str = await shortener.get_original_url(short_code)
         if not original_url:
             raise HTTPException(status_code=404, detail="URL not found")

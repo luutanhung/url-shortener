@@ -5,15 +5,12 @@ from typing import Any, Optional
 
 from fastapi import HTTPException
 from pymongo import ReturnDocument
-from pymongo.database import Database
 
 from app.models import URL
 
 
 class HashURLShortener:
-    def __init__(self, db: Database):
-        self.db = db
-        self.urls = db.urls
+    def __init__(self):
         self.short_length: int = 8
 
     async def _generate_hash_code(self, original_url: str, salt: int = 0) -> str:
@@ -32,7 +29,7 @@ class HashURLShortener:
         return short_code
 
     async def _check_collision(self, short_code: str) -> bool:
-        return await self.urls.find_one({"short_code": short_code}) is not None
+        return await URL.find_one({"short_code": short_code}) is not None
 
     async def shorten(
         self,
@@ -90,7 +87,7 @@ class HashURLShortener:
         return url_doc.model_dump()
 
     async def get_original_url(self, short_code: str) -> str | None:
-        result = await self.urls.find_one_and_update(
+        result = await URL.find_one_and_update(
             {"short_code": short_code},
             {
                 "$inc": {"clicks": 1},

@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.config import JWT_ALGORITHM, JWT_SECRET_KEY
-from app.models import LoginRequest, RegisterRequest, Token, User, UserRead
+from app.models import RegisterRequest, Token, User, UserRead
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/jwt/login")
 
@@ -59,9 +59,9 @@ async def register(user: RegisterRequest):
 
 
 @router.post("/jwt/login", response_model=Token)
-async def login(data: LoginRequest):
-    email: str = data.email
-    pwd: str = data.pwd
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    email: str = form_data.username
+    pwd: str = form_data.password
     user = await User.find_one(User.email == email)
     if not user or not user.verify_pwd(pwd):
         raise HTTPException(status_code=404, detail="Invalid credentials")

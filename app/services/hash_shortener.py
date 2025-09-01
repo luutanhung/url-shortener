@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import HTTPException
-from pymongo import ReturnDocument
 
 from app.models import URL
 
@@ -87,16 +86,13 @@ class HashURLShortener:
         return url_doc.model_dump()
 
     async def get_original_url(self, short_code: str) -> str | None:
-        result = await URL.find_one_and_update(
-            {"short_code": short_code},
-            {
-                "$inc": {"clicks": 1},
-                "$set": {"last_accessed": datetime.now(timezone.utc)},
-            },
-            return_document=ReturnDocument.AFTER,
-        )
-
+        result = await URL.find_one({"short_code": short_code})
         if result:
-            return result["original_url"]
-        else:
-            return None
+            await result.set(
+                {
+                    URL.clicks: result.clicks + 1,
+                    URL.last_accessed: datetime.now(timezone.utc),
+                }
+            )
+            return result.original_url
+        return None

@@ -3,7 +3,7 @@ from typing import Optional
 
 from beanie import Document, PydanticObjectId
 from bson.objectid import ObjectId
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_serializer
 
 
 class URL(Document):
@@ -40,6 +40,10 @@ class URLRead(BaseModel):
             PydanticObjectId: str,
         },
     }
+
+    @field_serializer("id")
+    def serialize_id(self, id: PydanticObjectId, _info):
+        return str(id)
 
 
 class URLCreate(BaseModel):

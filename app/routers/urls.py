@@ -14,7 +14,7 @@ router = APIRouter()
 @router.post(
     "/api/shorten",
     response_description="Shorten a URL",
-    response_model=URLRead,
+    # response_model=URLRead,
     response_model_by_alias=False,
     status_code=status.HTTP_201_CREATED,
 )
@@ -30,7 +30,11 @@ async def shorten(
             short_code=url_data.short_code,
             expires_at=url_data.expires_at,
         )
-        return URLRead(**result)
+        return {
+            "success": True,
+            "message": "URL shortened successfully",
+            "data": URLRead(**result).model_dump(),
+        }
     except ValueError as e:
         print("Validation error in URL shortening", str(e))
         raise HTTPException(status_code=400, detail=str(e))
@@ -51,12 +55,24 @@ async def redirect(short_code: str):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/api/urls", response_model=list[URLRead], response_model_by_alias=False)
+@router.get("/api/urls")
 async def get_urls(user: User = Depends(get_current_user)):
     """
-    Retrieveds all URLs created by the currently authenticated user.
+    Retrieves all URLs created by the currently authenticated user.
     """
-    return await URL.find({"created_by": str(user.id)}).to_list()
+    try:
+        urls = await URL.find({"created_by": str(user.id)}).to_list()
+        return {
+            "success": True,
+            "message": "URLs retrieved successfully.",
+            "data": urls,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"An error occurred: {str(e)}",
+            "data": None,
+        }
 
 
 @router.delete("/api/urls/{short_code}", response_model=dict[str, str])
@@ -76,4 +92,8 @@ async def delete(
         )
 
     await url.delete()
-    return {"message": f"Shortened URL '{short_code}' deleted successfully"}
+    return {
+        "success": True,
+        "message": f"Shortened URL '{short_code}' deleted successfully",
+        "data": {"short_code": short_code},
+    }

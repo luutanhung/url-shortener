@@ -2,19 +2,26 @@
 
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Checkbox, Form, Input, Typography } from "antd";
+import {
+    Button,
+    Card,
+    Checkbox,
+    Form,
+    Input,
+    notification,
+    Typography,
+} from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MainLayout } from "@/layouts";
 import { login } from "@/lib";
-import { useAuthStore } from "@/stores";
 
 const { Title, Text } = Typography;
 
 export default function LoginPage() {
     const router = useRouter();
-    const setCredentials = useAuthStore((state) => state.setCredentials);
+    const [notificationApi, contextHolder] = notification.useNotification();
 
     const {
         mutate: loginMutate,
@@ -24,14 +31,25 @@ export default function LoginPage() {
     } = useMutation({
         mutationFn: async (values) => {
             const data = await login(values);
-            console.log(data);
         },
         onSuccess: (res) => {
-            router.push("/dashboard");
-            console.log("login successfully");
+            notificationApi.success({
+                message: "Success",
+                description: "Login successfully! Redirecting...",
+                placement: "topRight",
+                duration: 2,
+            });
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 1000);
         },
         onError: (err) => {
-            console.err(response?.data?.message || "Login failed!");
+            notificationApi.error({
+                message: "Login Failed",
+                description: err?.response?.data.detail || "Login failed",
+                placement: "topLeft",
+                duration: 3,
+            });
         },
     });
 
@@ -41,6 +59,7 @@ export default function LoginPage() {
 
     return (
         <MainLayout>
+            {contextHolder}
             <div className="h-full flex justify-center items-center">
                 <Card className="max-w-full shadow-lg">
                     <Title level={2} className="text-center mb-6">

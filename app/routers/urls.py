@@ -62,7 +62,7 @@ async def get_urls(user: User = Depends(get_current_user)):
         return {
             "success": True,
             "message": "URLs retrieved successfully.",
-            "data": urls,
+            "data": [{**url.model_dump(), "id": str(url.id)} for url in urls],
         }
     except Exception as e:
         return {

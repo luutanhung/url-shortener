@@ -16,6 +16,7 @@ import { useState } from "react";
 import { BASE_API_URL } from "@/config/environments";
 import { MainLayout } from "@/layouts";
 import { api } from "@/lib";
+import { useAuthStore } from "@/stores";
 
 const { Text } = Typography;
 
@@ -23,6 +24,7 @@ export default function MainPage() {
     const [shortCode, setShortCode] = useState(null);
     const [form] = Form.useForm();
     const [notificationApi, contextHolder] = notification.useNotification();
+    const { user } = useAuthStore();
 
     const validateFutureDate = (_, value) => {
         if (value && value.isBefore(dayjs())) {
@@ -38,6 +40,7 @@ export default function MainPage() {
             api.post("/shorten", {
                 ...values,
                 expires_at: values.expires_at.toISOString(),
+                created_by: user ? user.id : null,
             }),
         onSuccess: (res) => {
             const shortCode = res.data.data.short_code;

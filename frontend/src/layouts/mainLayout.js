@@ -1,3 +1,5 @@
+"use client";
+
 import { Layout } from "antd";
 
 import { Header } from "@/components";
@@ -12,7 +14,14 @@ export function MainLayout({ children }) {
             }}
         >
             <Header />
-            <Content className="h-screen">{children}</Content>
+            <Content
+                className="h-screen"
+                style={{
+                    paddingTop: "64px",
+                }}
+            >
+                {children}
+            </Content>
         </Layout>
     );
 }

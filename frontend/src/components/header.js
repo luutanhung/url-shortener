@@ -12,12 +12,16 @@ const { Title } = Typography;
 
 export const Header = () => {
     const pathname = usePathname();
-    const { user, clearCredentials } = useAuthStore();
+    const { user } = useAuthStore();
 
     const menuItems = [
         {
             key: "/",
             label: <Link href="/">Home</Link>,
+        },
+        {
+            key: "/dashboard",
+            label: <Link href="/dashboard">Dashboard</Link>,
         },
     ];
 
@@ -74,7 +78,12 @@ export const Header = () => {
                         <Link href="/account">
                             <Button type="primary">Account</Button>
                         </Link>
-                        <Button danger onClick={logout} className="ml-2">
+                        <Button
+                            color="danger"
+                            variant="solid"
+                            onClick={logout}
+                            className="ml-2"
+                        >
                             Logout
                         </Button>
                     </>

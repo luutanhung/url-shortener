@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Layout, Menu, Typography } from "antd";
+import { Button, Image, Layout, Menu, Typography } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -54,7 +54,14 @@ export const Header = () => {
                     gap: "16px",
                 }}
             >
-                <Title level={3}>URL Shortener</Title>
+                <Link href="/" className="flex justify-center items-center">
+                    <Image
+                        src="/url-shortener-logo.png"
+                        alt="URL Shortener Logo"
+                        preview={false}
+                        style={{ height: "36px" }}
+                    />
+                </Link>
                 <Menu
                     mode="horizontal"
                     selectedKeys={[pathname]}

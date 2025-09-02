@@ -32,7 +32,7 @@ export default function MainPage() {
 
     return (
         <MainLayout>
-            <div className="flex justify-center items-center min-h-screen px-4">
+            <div className="h-screen flex justify-center items-center px-4">
                 <Card className="w-full max-w-md">
                     <Form
                         name="shorten_url_form"

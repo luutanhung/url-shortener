@@ -20,6 +20,9 @@ export const Header = () => {
     return (
         <AntHeader
             style={{
+                position: "fixed",
+                zIndex: 1,
+                width: "100%",
                 display: "flex",
                 alignItems: "center",
                 background: "#fff",

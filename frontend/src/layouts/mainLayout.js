@@ -1,15 +1,18 @@
 import { Layout } from "antd";
 
-import { Footer, Header } from "@/components";
+import { Header } from "@/components";
 
 const { Content } = Layout;
 
 export function MainLayout({ children }) {
     return (
-        <Layout className="min-h-screen">
+        <Layout
+            style={{
+                minHeight: "100vh",
+            }}
+        >
             <Header />
-            <Content>{children}</Content>
-            <Footer />
+            <Content className="h-screen">{children}</Content>
         </Layout>
     );
 }

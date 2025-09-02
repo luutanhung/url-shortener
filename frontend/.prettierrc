@@ -8,7 +8,7 @@
     {
       "files": ["*.js", "*.jsx", "*.ts", "*.tsx"],
       "options": {
-        "tabWidth": 2
+        "tabWidth": 4
       }
     }
   ]

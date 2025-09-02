@@ -1,18 +1,39 @@
 "use client";
 
-import { Button, Image, Layout, Menu, Typography } from "antd";
+import { MenuOutlined } from "@ant-design/icons";
+import { Button, Drawer, Grid, Image, Layout, Menu } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { logout } from "@/lib";
 import { useAuthStore } from "@/stores";
 
+import { UserActions } from "./UserActions";
+
 const { Header: AntHeader } = Layout;
-const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 export const Header = () => {
     const pathname = usePathname();
     const { user } = useAuthStore();
+    const screens = useBreakpoint();
+
+    const [drawerVisible, setDrawerVisible] = useState(false);
+
+    const showDrawer = () => {
+        setDrawerVisible(true);
+    };
+
+    const closeDrawer = () => {
+        setDrawerVisible(false);
+    };
+
+    const handleMenuItemClick = () => {
+        if (!screens.md) {
+            closeDrawer();
+        }
+    };
 
     const menuItems = [
         {
@@ -29,6 +50,8 @@ export const Header = () => {
             : []),
     ];
 
+    const isMobile = screens.xs || screens.sm;
+
     return (
         <AntHeader
             style={{
@@ -39,7 +62,7 @@ export const Header = () => {
                 alignItems: "center",
                 background: "#fff",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                padding: "0 24px",
+                padding: screens.md ? "0 5rem" : "0 .5rem",
                 height: "64px",
             }}
         >
@@ -50,8 +73,8 @@ export const Header = () => {
                     alignItems: "center",
                     justifyContent: "flex-start",
                     margin: "0 auto",
-                    padding: "0 24px",
-                    gap: "16px",
+                    padding: isMobile ? "0" : "0 24px",
+                    gap: isMobile ? "0" : "16px",
                 }}
             >
                 <Link href="/" className="flex justify-center items-center">
@@ -62,53 +85,65 @@ export const Header = () => {
                         style={{ height: "36px" }}
                     />
                 </Link>
-                <Menu
-                    mode="horizontal"
-                    selectedKeys={[pathname]}
-                    items={menuItems}
-                    style={{
-                        border: "none",
-                        background: "transparent",
-                        flex: 1,
-                        justifyContent: "flex-start",
-                        alignItems: "center",
-                        borderBottom: "none",
-                    }}
-                />
-            </div>
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: "16px",
-                }}
-            >
-                {user ? (
-                    <>
-                        <Link href="/account">
-                            <Button type="primary">Account</Button>
-                        </Link>
-                        <Button
-                            color="danger"
-                            variant="solid"
-                            onClick={logout}
-                            className="ml-2"
-                        >
-                            Logout
-                        </Button>
-                    </>
+
+                {/* Desktop Menu */}
+                {screens.md ? (
+                    <Menu
+                        mode="horizontal"
+                        selectedKeys={[pathname]}
+                        items={menuItems}
+                        style={{
+                            border: "none",
+                            background: "transparent",
+                            flex: 1,
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            borderBottom: "none",
+                        }}
+                    />
                 ) : (
-                    <>
-                        <Link href="/auth/login">
-                            <Button type="primary">Login</Button>
-                        </Link>
-                        <Link href="/auth/register">
-                            <Button>Register</Button>
-                        </Link>
-                    </>
+                    // Mobile Menu Toggle
+                    <Button
+                        type="primary"
+                        icon={<MenuOutlined />}
+                        style={{ marginLeft: "auto" }}
+                        onClick={showDrawer}
+                    />
                 )}
             </div>
+
+            {screens.md && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        gap: "16px",
+                    }}
+                >
+                    <UserActions user={user} logout={logout} />
+                </div>
+            )}
+
+            {/* Mobile Drawer */}
+            {!screens.md && (
+                <Drawer
+                    title="Menu"
+                    placement="right"
+                    width={250}
+                    onClose={closeDrawer}
+                    open={drawerVisible}
+                >
+                    <Menu
+                        mode="vertical"
+                        selectedKeys={[pathname]}
+                        items={menuItems}
+                        style={{ borderRight: "none" }}
+                        onClick={handleMenuItemClick}
+                    />
+                    <UserActions user={user} logout={logout} />
+                </Drawer>
+            )}
         </AntHeader>
     );
 };

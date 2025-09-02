@@ -49,25 +49,26 @@ class HashURLShortener:
                 return existing_url.model_dump()
 
         if short_code is not None:
-            existing_code = URL.find_one({"short_code": short_code})
+            existing_code = await URL.find_one({"short_code": short_code})
             if existing_code:
                 raise HTTPException(status_code=400, detail="Short code already exists")
 
         salt: int = 0
-        max_attempts: int = 10
+        if short_code is None:
+            max_attempts: int = 10
 
-        while salt < max_attempts:
-            short_code: str = await self._generate_hash_code(original_url, salt)
+            while salt < max_attempts:
+                short_code: str = await self._generate_hash_code(original_url, salt)
 
-            collision = await self._check_collision(short_code)
-            if not collision:
-                break
+                collision = await self._check_collision(short_code)
+                if not collision:
+                    break
 
-            salt += 1
-        else:
-            short_code: str = self._generate_hash_code(
-                f"{original_url}{datetime.now().timestamp()}"
-            )
+                salt += 1
+            else:
+                short_code: str = self._generate_hash_code(
+                    f"{original_url}{datetime.now().timestamp()}"
+                )
 
         expires_at = expires_at or (datetime.now(timezone.utc) + timedelta(days=1))
 

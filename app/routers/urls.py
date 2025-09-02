@@ -14,7 +14,6 @@ router = APIRouter()
 @router.post(
     "/api/shorten",
     response_description="Shorten a URL",
-    # response_model=URLRead,
     response_model_by_alias=False,
     status_code=status.HTTP_201_CREATED,
 )
@@ -36,11 +35,9 @@ async def shorten(
             "data": URLRead(**result).model_dump(),
         }
     except ValueError as e:
-        print("Validation error in URL shortening", str(e))
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        print("Unexpected error shortening URL", str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise e
 
 
 @router.get("/{short_code}", response_description="Redirect to original URL")

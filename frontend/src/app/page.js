@@ -1,10 +1,19 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Form, Input, Typography } from "antd";
+import {
+    Button,
+    Card,
+    DatePicker,
+    Form,
+    Input,
+    notification,
+    Typography,
+} from "antd";
+import dayjs from "dayjs";
 import { useState } from "react";
 
-import { API_URL } from "@/config/environments";
+import { BASE_API_URL } from "@/config/environments";
 import { MainLayout } from "@/layouts";
 import { api } from "@/lib";
 
@@ -12,16 +21,48 @@ const { Text } = Typography;
 
 export default function MainPage() {
     const [shortCode, setShortCode] = useState(null);
+    const [form] = Form.useForm();
+    const [notificationApi, contextHolder] = notification.useNotification();
+
+    const validateFutureDate = (_, value) => {
+        if (value && value.isBefore(dayjs())) {
+            return Promise.reject(
+                new Error("Expiration date cannot be in the past!")
+            );
+        }
+        return Promise.resolve();
+    };
 
     const { mutate, isPending, isError, error } = useMutation({
-        mutationFn: (values) => api.post("/api/shorten", values),
+        mutationFn: (values) =>
+            api.post("/shorten", {
+                ...values,
+                expires_at: values.expires_at.toISOString(),
+            }),
         onSuccess: (res) => {
-            setShortCode(res.data.data.short_code);
+            const shortCode = res.data.data.short_code;
+            if (shortCode !== form.getFieldValue("short_code")) {
+                notificationApi.success({
+                    message: "Success",
+                    description: `This URL has already been shortened. You can use the existing short code: ${shortCode}`,
+                });
+            } else {
+                notificationApi.success({
+                    message: "Success",
+                    description: `New short code: ${shortCode}`,
+                });
+            }
+            setShortCode(shortCode);
         },
         onError: (err) => {
-            console.log(
-                err?.response?.data?.message || "URL shortening failed!"
+            console.error(
+                err?.response?.data?.detail || "URL shortening failed!"
             );
+            notificationApi.error({
+                message: "Error",
+                description:
+                    err?.response?.data?.detail || "URL shortening failed!",
+            });
         },
     });
 
@@ -31,15 +72,21 @@ export default function MainPage() {
 
     return (
         <MainLayout>
+            {contextHolder}
             <div className="h-screen flex justify-center items-center px-4">
                 <Card className="w-full max-w-md">
                     <Form
+                        form={form}
                         name="shorten_url_form"
                         layout="vertical"
                         onFinish={onFinish}
+                        initialValues={{
+                            original_url: "",
+                            short_code: null,
+                        }}
                     >
                         <Form.Item
-                            label="Original URL"
+                            label="Enter URL to shorten"
                             name="original_url"
                             rules={[
                                 {
@@ -54,6 +101,24 @@ export default function MainPage() {
                         >
                             <Input placeholder="https://example.com" />
                         </Form.Item>
+                        <Form.Item name="short_code" label="Custom Short Code">
+                            <Input placeholder="Enter your desired custom short code" />
+                        </Form.Item>
+                        <Form.Item
+                            name="expires_at"
+                            label="Expires At"
+                            rules={[
+                                {
+                                    validator: validateFutureDate,
+                                },
+                            ]}
+                        >
+                            <DatePicker
+                                showTime
+                                format="YYYY-MM-DD HH:mm:ss"
+                                placeholder="Select expiration date"
+                            />
+                        </Form.Item>
                         <Form.Item>
                             <Button
                                 type="primary"
@@ -61,7 +126,7 @@ export default function MainPage() {
                                 className="w-full"
                                 loading={isPending}
                             >
-                                {isPending ? "Shortening... " : "Shorten URL"}
+                                {isPending ? "Shortening... " : "Shorten"}
                             </Button>
                         </Form.Item>
 
@@ -70,7 +135,7 @@ export default function MainPage() {
                                 <Text>
                                     Shortened URL:{" "}
                                     <a
-                                        href={`${API_URL}/${shortCode}`}
+                                        href={`${BASE_API_URL}/${shortCode}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
@@ -79,7 +144,6 @@ export default function MainPage() {
                                 </Text>
                             </Form.Item>
                         )}
-                        {isError && <Text type="danger">{error.message}</Text>}
                     </Form>
                 </Card>
             </div>

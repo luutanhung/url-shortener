@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 
 import { useAuthStore } from "@/stores";
 
-import { api } from "./axios";
+import { api } from "./apiClient";
 
 export const login = async (credentials) => {
     const formData = new URLSearchParams();

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { MainLayout } from "@/layouts";
-import api from "@/lib/axios";
+import api from "@/lib/apiClient";
 
 const { Title, Text, Link } = Typography;
 

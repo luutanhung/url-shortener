@@ -14,7 +14,6 @@ from app.models import (
     ChangePasswordRequest,
     RegisterRequest,
     ResponseModel,
-    Token,
     User,
     UserRead,
 )
@@ -123,7 +122,7 @@ async def activate(token: str):
     return {"message": "Account activated successfully"}
 
 
-@router.post("/jwt/login", response_model=Token)
+@router.post("/jwt/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     email: str = form_data.username
     pwd: str = form_data.password
@@ -138,7 +137,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
 
     token = create_access_token({"sub": str(user.id)})
-    return Token(access_token=token, token_type="bearer")
+    return {
+        "success": True,
+        "message": "Login successfully",
+        "data": {
+            "access_token": token,
+            "token_type": "Bearer",
+            "user": UserRead(
+                id=str(user.id),
+                email=user.email,
+                username=user.username,
+                is_active=user.is_active,
+            ).model_dump(),
+        },
+    }
 
 
 @router.post("/change-password", response_model=ResponseModel)

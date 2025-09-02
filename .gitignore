@@ -57,3 +57,6 @@ wheels/
 
 # VSCode
 .vscode
+
+*storybook.log
+storybook-static

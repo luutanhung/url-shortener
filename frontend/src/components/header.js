@@ -19,10 +19,14 @@ export const Header = () => {
             key: "/",
             label: <Link href="/">Home</Link>,
         },
-        {
-            key: "/dashboard",
-            label: <Link href="/dashboard">Dashboard</Link>,
-        },
+        ...(user
+            ? [
+                  {
+                      key: "/dashboard",
+                      label: <Link href="/dashboard">Dashboard</Link>,
+                  },
+              ]
+            : []),
     ];
 
     return (

@@ -76,7 +76,12 @@ export default function MainPage() {
     return (
         <MainLayout>
             {contextHolder}
-            <div className="h-screen flex justify-center items-center px-4">
+            <div
+                className="flex justify-center items-center px-4"
+                style={{
+                    paddingTop: "150px",
+                }}
+            >
                 <Card className="w-full max-w-md">
                     <Form
                         form={form}

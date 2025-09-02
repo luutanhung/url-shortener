@@ -8,7 +8,7 @@ class User(Document):
     email: EmailStr
     username: str
     pwd: str
-    is_active: bool = True
+    is_active: bool = False
 
     class Settings:
         name = "users"

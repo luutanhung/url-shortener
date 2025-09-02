@@ -20,8 +20,18 @@ export default function LoginPage() {
         isError,
         error,
     } = useMutation({
-        mutationFn: (values) => api.post("/auth/jwt/login", values),
+        mutationFn: async (values) => {
+            const formData = new URLSearchParams();
+            formData.append("username", values.email);
+            formData.append("password", values.password);
+            return await api.post("/auth/jwt/login", formData, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+        },
         onSuccess: (res) => {
+            console.log(res);
             const token = res.data.access_token;
             localStorage.setItem("token", token);
             router.push("/dashboard");
@@ -66,7 +76,7 @@ export default function LoginPage() {
                         </Form.Item>
                         <Form.Item
                             label="Password"
-                            name="pwd"
+                            name="password"
                             rules={[
                                 {
                                     required: true,

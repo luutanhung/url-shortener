@@ -27,6 +27,7 @@ export default function RegisterPage() {
             setLoading(false);
         }
     };
+
     return (
         <MainLayout>
             <div className="flex justify-center items-center min-h-screen">

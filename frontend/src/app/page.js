@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { Button, Card, Form, Input, Typography } from "antd";
 import { useState } from "react";
 
@@ -8,20 +9,21 @@ import api from "@/utils/axios";
 
 const { Text } = Typography;
 
-export default function HomePage() {
-  const [loading, setLoading] = useState(false);
+export default function MainPage() {
   const [shortCode, setShortCode] = useState(null);
 
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (values) => api.post("/api/shorten", values),
+    onSuccess: (res) => {
+      setShortCode(res.data.data.short_code);
+    },
+    onError: (err) => {
+      console.log(err?.response?.data?.message || "URL shortening failed!");
+    },
+  });
+
   const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      const res = await api.post("/api/shorten", values);
-      setShortCode(res.data.short_code);
-    } catch (err) {
-      console.error(err?.response?.data?.message || "URL shortening failed!");
-    } finally {
-      setLoading(false);
-    }
+    mutate(values);
   };
 
   return (
@@ -43,9 +45,9 @@ export default function HomePage() {
               type="primary"
               htmlType="submit"
               className="w-full"
-              loading={loading}
+              loading={isPending}
             >
-              Shorten URL
+              {isPending ? "Shortening... " : "Shorten URL"}
             </Button>
           </Form.Item>
 
@@ -63,6 +65,7 @@ export default function HomePage() {
               </Text>
             </Form.Item>
           )}
+          {isError && <Text type="danger">{error.message}</Text>}
         </Form>
       </Card>
     </div>

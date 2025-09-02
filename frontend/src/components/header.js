@@ -4,11 +4,14 @@ import { Button, Layout, Menu, Typography } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useAuthStore } from "@/stores";
+
 const { Header: AntHeader } = Layout;
 const { Title } = Typography;
 
 export const Header = () => {
     const pathname = usePathname();
+    const { user, clearCredentials } = useAuthStore();
 
     const menuItems = [
         {
@@ -65,12 +68,29 @@ export const Header = () => {
                     gap: "16px",
                 }}
             >
-                <Link href="/auth/login">
-                    <Button type="primary">Login</Button>
-                </Link>
-                <Link href="/auth/register">
-                    <Button>Register</Button>
-                </Link>
+                {user ? (
+                    <>
+                        <Link href="/account">
+                            <Button type="primary">Account</Button>
+                        </Link>
+                        <Button
+                            danger
+                            onClick={clearCredentials}
+                            className="ml-2"
+                        >
+                            Logout
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <Link href="/auth/login">
+                            <Button type="primary">Login</Button>
+                        </Link>
+                        <Link href="/auth/register">
+                            <Button>Register</Button>
+                        </Link>
+                    </>
+                )}
             </div>
         </AntHeader>
     );

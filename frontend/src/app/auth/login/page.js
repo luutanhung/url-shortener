@@ -26,6 +26,7 @@ export default function LoginPage() {
             const formData = new URLSearchParams();
             formData.append("username", values.email);
             formData.append("password", values.password);
+
             return await api.post("/auth/jwt/login", formData, {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",

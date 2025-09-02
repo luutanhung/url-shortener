@@ -1,5 +1,11 @@
 "use client";
 
+import { MainLayout } from "@/layouts";
+
 export default function DashboardPage() {
-    return <h1>Dashboard</h1>;
+    return (
+        <MainLayout>
+            <h1>Dashboard</h1>;
+        </MainLayout>
+    );
 }

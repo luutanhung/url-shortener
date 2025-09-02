@@ -7,12 +7,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MainLayout } from "@/layouts";
+import { useAuthStore } from "@/stores";
 import api from "@/utils/axios";
 
 const { Title, Text } = Typography;
 
 export default function LoginPage() {
     const router = useRouter();
+    const setCredentials = useAuthStore((state) => state.setCredentials);
 
     const {
         mutate: loginMutate,
@@ -31,9 +33,7 @@ export default function LoginPage() {
             });
         },
         onSuccess: (res) => {
-            console.log(res);
-            const token = res.data.access_token;
-            localStorage.setItem("token", token);
+            setCredentials(res.data.data);
             router.push("/dashboard");
         },
         onError: (err) => {

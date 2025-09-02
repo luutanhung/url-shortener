@@ -1,3 +1,6 @@
+import "@/app/globals.css";
+import "antd/dist/reset.css";
+
 /** @type { import('@storybook/nextjs-vite').Preview } */
 const preview = {
     parameters: {

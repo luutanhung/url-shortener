@@ -7,8 +7,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MainLayout } from "@/layouts";
+import { login } from "@/lib";
 import { useAuthStore } from "@/stores";
-import api from "@/utils/axios";
 
 const { Title, Text } = Typography;
 
@@ -23,19 +23,12 @@ export default function LoginPage() {
         error,
     } = useMutation({
         mutationFn: async (values) => {
-            const formData = new URLSearchParams();
-            formData.append("username", values.email);
-            formData.append("password", values.password);
-
-            return await api.post("/auth/jwt/login", formData, {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
+            const data = await login(values);
+            console.log(data);
         },
         onSuccess: (res) => {
-            setCredentials(res.data.data);
             router.push("/dashboard");
+            console.log("login successfully");
         },
         onError: (err) => {
             console.err(response?.data?.message || "Login failed!");

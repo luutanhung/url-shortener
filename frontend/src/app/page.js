@@ -1,14 +1,13 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Form, Input, Layout, Typography } from "antd";
+import { Button, Card, Form, Input, Typography } from "antd";
 import { useState } from "react";
 
 import { API_URL } from "@/config/environments";
 import { MainLayout } from "@/layouts";
-import api from "@/utils/axios";
+import { api } from "@/lib";
 
-const { Content } = Layout;
 const { Text } = Typography;
 
 export default function MainPage() {

@@ -4,6 +4,7 @@ import { Button, Layout, Menu, Typography } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { logout } from "@/lib";
 import { useAuthStore } from "@/stores";
 
 const { Header: AntHeader } = Layout;
@@ -73,11 +74,7 @@ export const Header = () => {
                         <Link href="/account">
                             <Button type="primary">Account</Button>
                         </Link>
-                        <Button
-                            danger
-                            onClick={clearCredentials}
-                            className="ml-2"
-                        >
+                        <Button danger onClick={logout} className="ml-2">
                             Logout
                         </Button>
                     </>

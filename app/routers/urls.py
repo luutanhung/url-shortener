@@ -3,10 +3,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 
-from app.models import URLCreate, URLRead, User
+from app.models import URL, URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
 
-from .auth import get_current_user_optional
+from .auth import get_current_user, get_current_user_optional
 
 router = APIRouter()
 
@@ -49,3 +49,31 @@ async def redirect(short_code: str):
         return RedirectResponse(url=original_url)
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/api/urls", response_model=list[URLRead], response_model_by_alias=False)
+async def get_urls(user: User = Depends(get_current_user)):
+    """
+    Retrieveds all URLs created by the currently authenticated user.
+    """
+    return await URL.find({"created_by": str(user.id)}).to_list()
+
+
+@router.delete("/api/urls/{short_code}", response_model=dict[str, str])
+async def delete(
+    short_code: str, user: Optional[User] = Depends(get_current_user_optional)
+):
+    url = await URL.find_one({"short_code": short_code})
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Shortened URL not found"
+        )
+
+    if url.created_by is not None and url.created_by != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this URL",
+        )
+
+    await url.delete()
+    return {"message": f"Shortened URL '{short_code}' deleted successfully"}

@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 
 from app.models import URL, URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
@@ -57,22 +57,12 @@ async def get_urls(user: User = Depends(get_current_user)):
     """
     Retrieves all URLs created by the currently authenticated user.
     """
-    try:
-        urls = await URL.find({"created_by": str(user.id)}).to_list()
-        return {
-            "success": True,
-            "message": "URLs retrieved successfully.",
-            "data": [{**url.model_dump(), "id": str(url.id)} for url in urls],
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"An error occurred: {str(e)}",
-            "data": None,
-        }
+
+    urls = await URL.find({"created_by": str(user.id)}).to_list()
+    return [{**url.model_dump(), "id": str(url.id)} for url in urls]
 
 
-@router.delete("/api/urls/{short_code}", response_model=dict[str, str])
+@router.delete("/api/urls/{short_code}", status_code=204)
 async def delete(
     short_code: str, user: Optional[User] = Depends(get_current_user_optional)
 ):
@@ -89,8 +79,4 @@ async def delete(
         )
 
     await url.delete()
-    return {
-        "success": True,
-        "message": f"Shortened URL '{short_code}' deleted successfully",
-        "data": {"short_code": short_code},
-    }
+    return Response(status_code=204)

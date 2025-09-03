@@ -8,9 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import mongodb
 from app.exceptions import (
     ShortCodeAlreadyExists,
-    ShortenedURLNotFound,
+    URLDeleteNotAllowed,
+    URLNotFound,
     shortcode_exists_handler,
-    shortened_url_not_found_handler,
+    url_delete_not_allowed_handler,
+    url_not_found_handler,
 )
 from app.models import URL, User
 from app.routers import auth, urls, users
@@ -45,7 +47,8 @@ app.add_middleware(
 
 # Register exception handlers
 app.add_exception_handler(ShortCodeAlreadyExists, shortcode_exists_handler)
-app.add_exception_handler(ShortenedURLNotFound, shortened_url_not_found_handler)
+app.add_exception_handler(URLNotFound, url_not_found_handler)
+app.add_exception_handler(URLDeleteNotAllowed, url_delete_not_allowed_handler)
 
 # Include routers
 app.include_router(auth.router, tags=["Auth"])

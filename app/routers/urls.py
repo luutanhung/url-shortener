@@ -1,8 +1,9 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import RedirectResponse, Response
 
+from app.exceptions import ShortenedURLNotFound, URLDeleteNotAllowed
 from app.models import URL, URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
 
@@ -54,15 +55,10 @@ async def delete(
 ):
     url = await URL.find_one({"short_code": short_code})
     if not url:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Shortened URL not found"
-        )
+        raise ShortenedURLNotFound(short_code)
 
     if url.created_by is not None and url.created_by != str(user.id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to delete this URL",
-        )
+        raise URLDeleteNotAllowed(short_code)
 
     await url.delete()
     return Response(status_code=204)

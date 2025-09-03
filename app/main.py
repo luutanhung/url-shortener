@@ -10,9 +10,11 @@ from app.exceptions import (
     ShortCodeAlreadyExists,
     URLDeleteNotAllowed,
     URLNotFound,
+    UsernameAlreadyTaken,
     shortcode_exists_handler,
     url_delete_not_allowed_handler,
     url_not_found_handler,
+    username_already_taken_handler,
 )
 from app.models import URL, User
 from app.routers import auth, urls, users
@@ -49,6 +51,7 @@ app.add_middleware(
 app.add_exception_handler(ShortCodeAlreadyExists, shortcode_exists_handler)
 app.add_exception_handler(URLNotFound, url_not_found_handler)
 app.add_exception_handler(URLDeleteNotAllowed, url_delete_not_allowed_handler)
+app.add_exception_handler(UsernameAlreadyTaken, username_already_taken_handler)
 
 # Include routers
 app.include_router(auth.router, tags=["Auth"])

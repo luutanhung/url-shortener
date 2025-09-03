@@ -32,3 +32,7 @@ class UserRead(BaseModel):
     @field_serializer("id")
     def serialize_id(self, id: PydanticObjectId, _info):
         return str(id)
+
+
+class UserUpdate(BaseModel):
+    username: str

@@ -1,7 +1,7 @@
 from .auth import ChangePasswordRequest, RegisterRequest, Token
 from .response import ResponseModel
 from .url import URL, URLCreate, URLRead
-from .user import User, UserRead
+from .user import User, UserRead, UserUpdate
 
 __all__ = [
     "ResponseModel",
@@ -10,6 +10,7 @@ __all__ = [
     "URLCreate",
     "User",
     "UserRead",
+    "UserUpdate",
     "RegisterRequest",
     "Token",
     "ChangePasswordRequest",

@@ -24,6 +24,15 @@ class URLDeleteNotAllowed(Exception):
         )
 
 
+class UsernameAlreadyTaken(Exception):
+    """Raises when a username is already taken by another user."""
+
+    def __init__(self, username: str) -> None:
+        super().__init__(
+            f"Username '{username}' is already taken. Please use another username."
+        )
+
+
 async def shortcode_exists_handler(request, exc: ShortCodeAlreadyExists):
     return JSONResponse(status_code=400, content={"detail": str(exc)})
 
@@ -34,3 +43,7 @@ async def url_not_found_handler(request, exc: URLNotFound):
 
 async def url_delete_not_allowed_handler(request, exc: URLDeleteNotAllowed):
     return JSONResponse(status_code=403, content={"detail": str(exc)})
+
+
+async def username_already_taken_handler(request, exc: UsernameAlreadyTaken):
+    return JSONResponse(status_code=400, content={"detail", str(exc)})

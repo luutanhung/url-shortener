@@ -33,14 +33,9 @@ async def shorten(
 
 @router.get("/{short_code}", response_description="Redirect to original URL")
 async def redirect(short_code: str):
-    try:
-        shortener = HashURLShortener()
-        original_url: str = await shortener.get_original_url(short_code)
-        if not original_url:
-            raise HTTPException(status_code=404, detail="URL not found")
-        return RedirectResponse(url=original_url)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    shortener = HashURLShortener()
+    original_url: str = await shortener.get_original_url(short_code)
+    return RedirectResponse(url=original_url)
 
 
 @router.get("/api/urls")

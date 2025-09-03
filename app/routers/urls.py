@@ -1,3 +1,4 @@
+import re
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, status
@@ -44,23 +45,29 @@ async def get_urls(
     user: User = Depends(get_current_user),
     page: int = 1,
     limit: int = 10,
-    order_by: Literal["created_by", "short_code"] = "created_by",
+    order_by: Literal["created_at", "last_accessed", "clicks"] = "created_at",
     direction: Literal["asc", "desc"] = "desc",
+    search: Optional[str] = "",
 ):
     """
-    Retrieves all URLs created by the currently authenticated user with pagination and sorting by attributes.
+    Retrieves all URLs created by the currently authenticated user with pagination and sorting by attributes and optional search.
     """
 
     skip: int = (page - 1) * limit
     short_field = order_by if direction == "asc" else f"-{order_by}"
 
-    total = await URL.find({"created_by": str(user.id)}).count()
+    filter_query = {"created_by": str(user.id)}
+
+    if search:
+        regex = {"$regex": re.escape(search), "$options": "i"}
+        filter_query["$or"] = [
+            {"short_code": regex},
+            {"original_url": regex},
+        ]
+
+    total = await URL.find(filter_query).count()
     urls = (
-        await URL.find({"created_by": str(user.id)})
-        .sort(short_field)
-        .skip(skip)
-        .limit(limit)
-        .to_list()
+        await URL.find(filter_query).sort(short_field).skip(skip).limit(limit).to_list()
     )
 
     return {

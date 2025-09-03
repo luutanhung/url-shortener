@@ -30,7 +30,7 @@ export default function LoginPage() {
         error,
     } = useMutation({
         mutationFn: async (values) => {
-            const data = await login(values);
+            return await login(values);
         },
         onSuccess: (res) => {
             notificationApi.success({

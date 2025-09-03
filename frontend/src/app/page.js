@@ -36,14 +36,20 @@ export default function MainPage() {
     };
 
     const { mutate, isPending, isError, error } = useMutation({
-        mutationFn: (values) =>
-            api.post("/shorten", {
+        mutationFn: async (values) => {
+            const payload = {
                 ...values,
-                expires_at: values.expires_at.toISOString(),
+                expires_at: values.expires_at
+                    ? values.expires_at.toISOString()
+                    : null,
                 created_by: user ? user.id : null,
-            }),
-        onSuccess: (res) => {
-            const shortCode = res.data.data.short_code;
+            };
+
+            const res = await api.post("/shorten", payload);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            const shortCode = data.short_code;
             if (shortCode !== form.getFieldValue("short_code")) {
                 notificationApi.success({
                     message: "Success",
@@ -58,6 +64,7 @@ export default function MainPage() {
             setShortCode(shortCode);
         },
         onError: (err) => {
+            console.log(err);
             console.error(
                 err?.response?.data?.detail || "URL shortening failed!"
             );

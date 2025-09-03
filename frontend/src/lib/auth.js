@@ -15,7 +15,7 @@ export const login = async (credentials) => {
         },
     });
 
-    const data = res.data.data;
+    const data = res.data;
     useAuthStore.getState().setCredentials(data);
     Cookies.set("auth-token", data.access_token, { expires: 7 });
 

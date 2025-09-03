@@ -3,8 +3,7 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import HTTPException
-
+from app.exceptions import ShortCodeAlreadyExists
 from app.models import URL
 
 
@@ -51,7 +50,7 @@ class HashURLShortener:
         if short_code is not None:
             existing_code = await URL.find_one({"short_code": short_code})
             if existing_code:
-                raise HTTPException(status_code=400, detail="Short code already exists")
+                raise ShortCodeAlreadyExists(short_code)
 
         salt: int = 0
         if short_code is None:

@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import mongodb
+from app.exceptions import ShortCodeAlreadyExists, shortcode_exists_handler
 from app.models import URL, User
 from app.routers import auth, urls, users
 
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="URL Shortener", lifespan=lifespan)
 
+# Include middlewares
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,6 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register exception handlers
+app.add_exception_handler(ShortCodeAlreadyExists, shortcode_exists_handler)
+
+# Include routers
 app.include_router(auth.router, tags=["Auth"])
 app.include_router(urls.router, tags=["URLs"])
 app.include_router(users.router, tags=["Users"])

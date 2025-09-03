@@ -14,6 +14,7 @@ router = APIRouter()
 @router.post(
     "/api/shorten",
     response_description="Shorten a URL",
+    response_model=URLRead,
     response_model_by_alias=False,
     status_code=status.HTTP_201_CREATED,
 )
@@ -21,23 +22,13 @@ async def shorten(
     url_data: URLCreate,
     user: Optional[User] = Depends(get_current_user_optional),
 ):
-    try:
-        shortener = HashURLShortener()
-        result = await shortener.shorten(
-            str(url_data.original_url),
-            created_by=str(user.id) if user else None,
-            short_code=url_data.short_code,
-            expires_at=url_data.expires_at,
-        )
-        return {
-            "success": True,
-            "message": "URL shortened successfully",
-            "data": URLRead(**result).model_dump(),
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise e
+    shortener = HashURLShortener()
+    return await shortener.shorten(
+        str(url_data.original_url),
+        created_by=str(user.id) if user else None,
+        short_code=url_data.short_code,
+        expires_at=url_data.expires_at,
+    )
 
 
 @router.get("/{short_code}", response_description="Redirect to original URL")

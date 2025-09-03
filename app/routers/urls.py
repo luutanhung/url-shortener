@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import RedirectResponse, Response
 
-from app.exceptions import ShortenedURLNotFound, URLDeleteNotAllowed
+from app.exceptions import URLDeleteNotAllowed, URLNotFound
 from app.models import URL, URLCreate, URLRead, User
 from app.services.hash_shortener import HashURLShortener
 
@@ -40,13 +40,35 @@ async def redirect(short_code: str):
 
 
 @router.get("/api/urls")
-async def get_urls(user: User = Depends(get_current_user)):
+async def get_urls(
+    user: User = Depends(get_current_user),
+    page: int = 1,
+    limit: int = 10,
+    order_by: Literal["created_by", "short_code"] = "created_by",
+    direction: Literal["asc", "desc"] = "desc",
+):
     """
-    Retrieves all URLs created by the currently authenticated user.
+    Retrieves all URLs created by the currently authenticated user with pagination and sorting by attributes.
     """
 
-    urls = await URL.find({"created_by": str(user.id)}).to_list()
-    return [{**url.model_dump(), "id": str(url.id)} for url in urls]
+    skip: int = (page - 1) * limit
+    short_field = order_by if direction == "asc" else f"-{order_by}"
+
+    total = await URL.find({"created_by": str(user.id)}).count()
+    urls = (
+        await URL.find({"created_by": str(user.id)})
+        .sort(short_field)
+        .skip(skip)
+        .limit(limit)
+        .to_list()
+    )
+
+    return {
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "urls": [{**url.model_dump(), "id": str(url.id)} for url in urls],
+    }
 
 
 @router.delete("/api/urls/{short_code}", status_code=204)
@@ -55,7 +77,7 @@ async def delete(
 ):
     url = await URL.find_one({"short_code": short_code})
     if not url:
-        raise ShortenedURLNotFound(short_code)
+        raise URLNotFound(short_code)
 
     if url.created_by is not None and url.created_by != str(user.id):
         raise URLDeleteNotAllowed(short_code)

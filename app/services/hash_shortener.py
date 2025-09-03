@@ -3,7 +3,7 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from app.exceptions import ShortCodeAlreadyExists, ShortenedURLNotFound
+from app.exceptions import ShortCodeAlreadyExists, URLNotFound
 from app.models import URL
 
 
@@ -89,7 +89,7 @@ class HashURLShortener:
         result = await URL.find_one({"short_code": short_code})
 
         if not result:
-            raise ShortenedURLNotFound(short_code)
+            raise URLNotFound(short_code)
 
         if result:
             await result.set(
